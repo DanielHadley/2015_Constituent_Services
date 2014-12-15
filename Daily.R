@@ -4,6 +4,8 @@
 
 # working Directory and packages #
 setwd("k:/Somerstat/Common/Data/2015_Constituent_Services/")
+setwd("c:/Users/dhadley/Documents/GitHub/2015_Constituent_Services")
+
 
 library(RCurl)
 library(plyr)
