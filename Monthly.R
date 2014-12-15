@@ -160,3 +160,21 @@ ggplot(TypesOverdue, aes(x=reorder(Service.Type, total), y=total)) +
 ggsave("./plots/PerOnTme5.png", dpi=300, width=7, height=5)
 
 
+
+TypesOverdue <- d %>%
+  filter(On.Time  == "N") %>%
+  filter(Year  == 2014) %>%
+  group_by(Service.Type) %>%
+  summarise(total = sum(Tab)) %>%
+  arrange(desc(total)) %>%
+  filter(total > 55)
+
+ggplot(TypesOverdue, aes(x=reorder(Service.Type, total), y=total)) + 
+  geom_bar(colour="white", fill=nice_blue) + 
+  my.theme + ggtitle("Top Past Due '14") + xlab("Work Orders") +
+  ylab("Completed Past Due 2014") + 
+  scale_y_continuous(labels = comma) +
+  coord_flip() 
+
+ggsave("./plots/PerOnTme6.png", dpi=300, width=7, height=5)
+
