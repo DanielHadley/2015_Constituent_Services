@@ -69,20 +69,13 @@ my.theme <-
     ,axis.text.x = element_text(angle=60, hjust = 1) # Uncomment if X-axis unreadable 
   )
 
-d.top <- subset(d, Service.Type %in% arrange(count(d, .(Service.Type)), desc(freq))[1:10,]$Service.Type)
-toptype <- ddply(d.top, "Service.Type", summarise, count = sum(Tab, na.rm=TRUE))
-
-
-ggplot(toptype, aes(x=reorder(toptype$Service.Type, -toptype$count), y=toptype$count)) + geom_bar(stat = "identity", colour="white", fill=nice_blue) + 
-  my.theme + ggtitle("Calls Since 2007") + xlab("Top Call Types")+ylab("Number of Calls") +
-  theme(axis.text.x = element_text(angle=60, hjust = 1))
-
-ggsave("./plots/Monthlycalls01.png", dpi=300, width=3, height=3)
-
 
 
 
 #### Monthly overdue ####
+
+d <- filter(d, d$Service.Type != "T&P-Temporary No Parking Sign")
+
 overdue <- d %>%
   melt(id=c("Year.Month", "On.Time"), measure=c("Tab")) %>% # id = non-numeric; measure = numeric
   dcast(Year.Month ~ On.Time, sum) %>%
@@ -91,7 +84,8 @@ overdue <- d %>%
 
 ggplot(overdue, aes(x=overdue$Year.Month, y=overdue$Per.On.Time, group=1)) + 
   geom_line(colour=lime_green, size = 1.5) + 
-  my.theme + ggtitle("Percent Completed on Time") + xlab("Year-Month") +
+  my.theme + ggtitle("Work Orders Completed on Time") + xlab("Year-Month") +
+  theme(axis.text.x=element_text(size=6)) +
   ylab("% On Time") + 
   scale_y_continuous(labels = percent) 
 
@@ -100,12 +94,24 @@ ggsave("./plots/PerOnTme.png", dpi=300, width=7, height=5)
 
 ggplot(overdue, aes(x=overdue$Year.Month, y=overdue$Per.On.Time, group=1)) + 
   geom_line(colour=lime_green, size = 1.5) + 
-  my.theme + ggtitle("Percent Completed on Time") + xlab("Year-Month") +
+  my.theme + ggtitle("Work Orders Completed on Time") + xlab("Year-Month") +
+  theme(axis.text.x=element_text(size=6)) +
   ylab("% On Time") + 
   scale_y_continuous(labels = percent) +
   expand_limits(y = 0)
 
 ggsave("./plots/PerOnTme2.png", dpi=300, width=7, height=5)
+
+
+ggplot(overdue, aes(x=overdue$Per.On.Time)) + 
+  geom_histogram(colour="white", fill=lime_green, binwidth = .03) + 
+  my.theme + ggtitle("Work Orders Completed on Time") + xlab("% On Time") +
+  theme(axis.text.x=element_text(size=6)) +
+  ylab("# Months W/ This On Time Rate") + 
+  scale_x_continuous(labels = percent) +
+  expand_limits(y = 0)
+
+ggsave("./plots/PerOnTmeHist.png", dpi=300, width=7, height=5)
 
 
 
@@ -117,7 +123,7 @@ AnnualOverdue <- d %>%
 
 ggplot(AnnualOverdue, aes(x=Year, y=Per.On.Time)) + 
   geom_bar(colour="white", fill=lime_green) + 
-  my.theme + ggtitle("Percent Completed on Time") + xlab("Year") +
+  my.theme + ggtitle("Work Orders Completed on Time") + xlab("Year") +
   ylab("% On Time") + 
   scale_y_continuous(labels = percent) +
   expand_limits(y = 0)
@@ -152,7 +158,7 @@ TypesOverdue <- d %>%
 
 ggplot(TypesOverdue, aes(x=reorder(Service.Type, total), y=total)) + 
   geom_bar(colour="white", fill=nice_blue) + 
-  my.theme + ggtitle("Top Past Due") + xlab("Work Orders") +
+  my.theme + ggtitle("Top Work Orders Past Due") + xlab("Work Orders") +
   ylab("Completed Past Due Since 2008") + 
   scale_y_continuous(labels = comma) +
   coord_flip() 
@@ -171,7 +177,7 @@ TypesOverdue <- d %>%
 
 ggplot(TypesOverdue, aes(x=reorder(Service.Type, total), y=total)) + 
   geom_bar(colour="white", fill=nice_blue) + 
-  my.theme + ggtitle("Top Past Due '14") + xlab("Work Orders") +
+  my.theme + ggtitle("Top Work Orders Past Due") + xlab("Work Orders") +
   ylab("Completed Past Due 2014") + 
   scale_y_continuous(labels = comma) +
   coord_flip() 
