@@ -3,16 +3,14 @@
 
 
 # working Directory and packages #
-setwd("k:/Somerstat/Common/Data/2015_Constituent_Services/")
 setwd("c:/Users/dhadley/Documents/GitHub/2015_Constituent_Services")
 
 
 library(RCurl)
-library(plyr)
+library(dplyr)
 library(ggplot2)
 library(scales) # for changing from scientific notation
-# Example scale feature: scale_y_continuous(labels = comma) or scale_y_continuous(labels = dollar)
-library(reshape2)
+library(tidyr)
 
 
 
@@ -41,9 +39,6 @@ d <- read.table(f, sep=',', dec='.', header=TRUE, fill = TRUE)
 remove(f, url, x)
 
 
-#### Add variables/ Clean Data ####
-d$Tab <- 1
-
 
 ####  Visualize ####
 
@@ -65,16 +60,38 @@ my.theme <-
     axis.text=element_text(size=6), # Enlarge axis text font
     axis.title=element_text(size=8), # Enlarge axis title font
     plot.title=element_text(size=12) # Enlarge, left-align title
-    #,axis.text.x = element_text(angle=60, hjust = 1) # Uncomment if X-axis unreadable 
+    ,axis.text.x = element_text(angle=60, hjust = 1) # Uncomment if X-axis unreadable 
   )
 
-d.top <- subset(d, Service.Type %in% arrange(count(d, .(Service.Type)), desc(freq))[1:10,]$Service.Type)
-toptype <- ddply(d.top, "Service.Type", summarise, count = sum(Tab, na.rm=TRUE))
+
+# dates
+today <- Sys.Date()
+
+d$Date <- as.Date(d$Date, "%m/%d/%Y")
+d$Year.Month <- format(d$Date, '%Y-%m')
+d$Month <- format(d$Date, '%m')
+d$Year <- format(d$Date, '%Y')
+
+d$DaysAgo <- difftime(d$Date, today, units = "days")
 
 
-ggplot(toptype, aes(x=reorder(toptype$Service.Type, -toptype$count), y=toptype$count)) + geom_bar(stat = "identity", colour="white", fill=nice_blue) + 
-  my.theme + ggtitle("Calls Since 2007") + xlab("Top Call Types")+ylab("Number of Calls") +
-  theme(axis.text.x = element_text(angle=60, hjust = 1))
 
-ggsave("./plots/daily01.png", dpi=300, width=3, height=3)
+
+#### Top from last day #### 
+
+LastTwentyFour <- d %>%
+  filter(DaysAgo > -2) %>%
+  group_by(Service.Type) %>%
+  summarize(count=n()) %>%
+  filter(count > 5)
+
+ggplot(LastTwentyFour, aes(x=reorder(Service.Type, count)  , y=count)) + 
+  geom_bar(stat = "identity", colour="white", fill=nice_blue) + 
+  my.theme + ggtitle(paste("Top Work Orders From Yesterday:", today-1)) + xlab("Request") +
+  ylab("# of Requests") + 
+  scale_y_continuous(labels = comma) 
+
+ggsave("./plots/daily/LastTwentyFour.png", dpi=300, width=5, height=5)
+
+
 
