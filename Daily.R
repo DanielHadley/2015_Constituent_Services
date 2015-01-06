@@ -66,6 +66,7 @@ my.theme <-
 
 # dates
 today <- Sys.Date()
+yesterday <- today - 1
 
 d$Date <- as.Date(d$Date, "%m/%d/%Y")
 d$Year.Month <- format(d$Date, '%Y-%m')
@@ -87,11 +88,13 @@ LastTwentyFour <- d %>%
 
 ggplot(LastTwentyFour, aes(x=reorder(Service.Type, count)  , y=count)) + 
   geom_bar(stat = "identity", colour="white", fill=nice_blue) + 
-  my.theme + ggtitle(paste("Top Work Orders From Yesterday:", today-1)) + xlab("Request") +
+  my.theme + ggtitle(paste("Top Work Orders From Yesterday:", yesterday)) + xlab("Request") +
   ylab("# of Requests") + 
   scale_y_continuous(labels = comma) 
 
+ggsave(paste("./plots/daily/", yesterday, "_LastTwentyFour.png", sep=""), dpi=300, width=5, height=5)
 ggsave("./plots/daily/LastTwentyFour.png", dpi=300, width=5, height=5)
+
 
 
 
