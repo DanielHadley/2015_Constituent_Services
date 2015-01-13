@@ -35,6 +35,10 @@ f <- file('./data/Daily.csv', open="r", encoding="UTF-16LE")
 d <- read.table(f, sep=',', dec='.', header=TRUE, fill = TRUE)
 
 
+# Write it to the K drive
+# write.csv(d, "K:/Somerstat/Common/Data/2015_Constituent_Services/data/Daily.csv")
+
+
 # Remove everything else
 remove(f, url, x)
 
@@ -92,8 +96,10 @@ ggplot(LastTwentyFour, aes(x=reorder(Service.Type, count)  , y=count)) +
   ylab("# of Requests") + 
   scale_y_continuous(labels = comma) 
 
-ggsave(paste("./plots/daily/", yesterday, "_LastTwentyFour.png", sep=""), dpi=300, width=5, height=5)
+# ggsave(paste("./plots/daily/", yesterday, "_LastTwentyFour.png", sep=""), dpi=300, width=5, height=5)
 ggsave("./plots/daily/LastTwentyFour.png", dpi=300, width=5, height=5)
+# ggsave("K:/Somerstat/Common/Data/2015_Constituent_Services/plots/LastTwentyFour.png", dpi=300, width=5, height=5)
+
 
 
 
