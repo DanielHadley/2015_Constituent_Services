@@ -1,0 +1,17 @@
+Loading required package: bitops
+
+Attaching package: 'dplyr'
+
+The following object is masked from 'package:stats':
+
+    filter
+
+The following objects are masked from 'package:base':
+
+    intersect, setdiff, setequal, union
+
+Warning message:
+closing unused connection 3 (./data/Daily.csv) 
+> proc.time()
+   user  system elapsed 
+  30.46    9.46  339.34 
