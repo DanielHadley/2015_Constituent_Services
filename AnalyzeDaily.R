@@ -9,6 +9,7 @@ library(tidyr)
 library(ggplot2)
 library(scales)
 library(ggmap)
+library(lubridate)
 
 setwd("K:/Somerstat/Common/Data/2015_Constituent_Services")
 
@@ -59,24 +60,6 @@ my.theme <-
 
 #### Start analyzing #### 
 # Use this cheat sheet: http://www.rstudio.com/wp-content/uploads/2015/01/data-wrangling-cheatsheet1.pdf
-
-# Get the top work orders from yesterday, plot them, and save to plots
-LastTwentyFour <- d %>%
-  filter(DaysAgo > -2) %>%
-  group_by(Service.Type) %>%
-  summarize(count=n()) %>%
-  filter(count > 5)
-
-ggplot(LastTwentyFour, aes(x=reorder(Service.Type, count)  , y=count)) + 
-  geom_bar(stat = "identity", colour="white", fill=nice_blue) + 
-  my.theme + ggtitle(paste("Top Work Orders From Yesterday:", yesterday)) + xlab("Request") +
-  ylab("# of Requests") + 
-  scale_y_continuous(labels = comma) 
-
-ggsave("./plots/LastTwentyFour.png", dpi=300, width=5, height=5)
-
-
-
 #### Thorough analysis of one work order type ####
 
 d$Service.Type <- gsub("/", "-", d$Service.Type) # take out / because it makes it hard to save plots
@@ -85,8 +68,7 @@ d$Service.Type <- gsub("/", "-", d$Service.Type) # take out / because it makes i
 sort(unique(d$Service.Type))
 
 # Then copy and paste it into the quotes below and run the following code
-# I must fix ggsave on ones with / like this:
-workOrder <- "DPW-Trash-Xmas Tree Pick Up"
+workOrder <- "Health-Snow-Sidewalk not Shoveled"
 
 workOrderData <- d %>%
   filter(Service.Type == workOrder)
@@ -145,12 +127,115 @@ ggplot(tsm, aes(x=Year.Month, y=Events, group = 1)) +
 ggsave(paste("./plots/OneOff/",workOrder, "_MonthlyTimeSeries.png", sep=""), dpi=250, width=5, height=3)
 
 
-# ### Maps
-# 
-# # Dot map 
-# map.center <- geocode("New York City, NY")
-# SHmap <- qmap(c(lon=map.center$lon, lat=map.center$lat), source="google", zoom = 11, color='bw')
-# SHmap + geom_point(data=d, aes(y=Latitude, x=Longitude), size = 2, alpha = .7, bins = 26, color="red",) + 
-#   ggtitle(paste("Rat Calls: ", lastWeekText, " to ", todayText, ", ", Year, sep="")) 
-# 
-# ggsave(paste("/Users/dphnrome/Google Drive/RatMaps/posts/NYC_Rat_Map_",today,".png",sep=""), dpi=200, width=4, height=4)
+
+#### Maps ####
+
+workOrderDataRecent <- filter(workOrderData, DaysAgo >= -30)
+
+addresses <- paste(workOrderDataRecent$Location, "Somerville", "MA", sep=", ")
+locs <- geocode(addresses)
+locs2 <- subset(locs, lat != 42.3875968 ) # Takes out the weird ones Google couldn't pin
+# I map locs2 because when Google can't find something, it usually puts it int the center of the map
+# This throws off the heat maps
+
+
+# Dot map 
+map.center <- geocode("Central Rd, Somerville, MA")
+SHmap <- qmap(c(lon=map.center$lon, lat=map.center$lat), source="google", zoom = 14)
+SHmap + geom_point(
+  aes(x=locs2$lon, y=locs2$lat),size = 3, alpha = .7, bins = 26, color="red", 
+  data = locs2) +
+  ggtitle(paste(workOrder, "Calls Since", sixtyDaysAgo))
+
+ggsave(paste("./plots/OneOff/",workOrder, "_map.png", sep=""), dpi=250, width=6, height=5)
+
+
+# Dot map 
+map.center <- geocode("East Somerville, Somerville, MA")
+SHmap <- qmap(c(lon=map.center$lon, lat=map.center$lat), source="google", zoom = 15)
+SHmap + geom_point(
+  aes(x=locs2$lon, y=locs2$lat),size = 3, alpha = .7, bins = 26, color="red", 
+  data = locs2) +
+  ggtitle(paste(workOrder, "Calls Since", sixtyDaysAgo))
+
+ggsave(paste("./plots/OneOff/",workOrder, "_map_East.png", sep=""), dpi=250, width=6, height=5)
+
+
+# Dot map 
+map.center <- geocode("West Somerville, Somerville, MA")
+SHmap <- qmap(c(lon=map.center$lon, lat=map.center$lat), source="google", zoom = 15)
+SHmap + geom_point(
+  aes(x=locs2$lon, y=locs2$lat),size = 3, alpha = .7, bins = 26, color="red", 
+  data = locs2) +
+  ggtitle(paste(workOrder, "Calls Since", sixtyDaysAgo))
+
+ggsave(paste("./plots/OneOff/",workOrder, "_map_West.png", sep=""), dpi=250, width=6, height=5)
+
+
+# Dot map 
+map.center <- geocode("Central Rd, Somerville, MA")
+SHmap <- qmap(c(lon=map.center$lon, lat=map.center$lat), source="google", zoom = 15)
+SHmap + geom_point(
+  aes(x=locs2$lon, y=locs2$lat),size = 3, alpha = .7, bins = 26, color="red", 
+  data = locs2) +
+  ggtitle(paste(workOrder, "Calls Since", sixtyDaysAgo))
+
+ggsave(paste("./plots/OneOff/",workOrder, "_map_Central.png", sep=""), dpi=250, width=6, height=5)
+
+
+# Dot map 
+map.center <- geocode("Union Sq, Somerville, MA")
+SHmap <- qmap(c(lon=map.center$lon, lat=map.center$lat), source="google", zoom = 16)
+SHmap + geom_point(
+  aes(x=locs2$lon, y=locs2$lat),size = 4, alpha = .7, bins = 26, color="red", 
+  data = locs2) +
+  ggtitle(paste(workOrder, "Calls Since", sixtyDaysAgo))
+
+ggsave(paste("./plots/OneOff/",workOrder, "_map_Union.png", sep=""), dpi=250, width=6, height=5)
+
+
+# Dot map 
+map.center <- geocode("Davis Sq, Somerville, MA")
+SHmap <- qmap(c(lon=map.center$lon, lat=map.center$lat), source="google", zoom = 16)
+SHmap + geom_point(
+  aes(x=locs2$lon, y=locs2$lat),size = 4, alpha = .7, bins = 26, color="red", 
+  data = locs2) +
+  ggtitle(paste(workOrder, "Calls Since", sixtyDaysAgo))
+
+ggsave(paste("./plots/OneOff/",workOrder, "_map_Davis.png", sep=""), dpi=250, width=6, height=5)
+
+
+
+# More traditional heat map
+map.center <- geocode("Central Rd, Somerville, MA")
+map.center <- c(lon=map.center$lon, lat=map.center$lat)
+somerville.map = get_map(location = map.center, zoom = 13, maptype="roadmap",color = "bw")
+ggmap(somerville.map, extent = "panel", maprange=FALSE) %+% locs2 + aes(x = locs2$lon, y = locs2$lat) +
+  # geom_density2d(data = locs2, aes(x = lon, y = lat)) + # uncomment for contour lines
+  stat_density2d(data = locs2, aes(x = lon, y = lat,  fill = ..level.., alpha = ..level..),
+                 size = 0.01, bins = 16, geom = 'polygon') +
+  scale_fill_gradient(low = "green", high = "red") +
+  scale_alpha(range = c(0.00, 0.25), guide = FALSE) +
+  theme(legend.position = "none", axis.title = element_blank(), text = element_text(size = 12)) +
+  ggtitle(paste(workOrder, "Calls Since", sixtyDaysAgo))
+
+
+ggsave(paste("./plots/OneOff/",workOrder, "_map_Heat1.png", sep=""), dpi=250, width=6, height=5)
+
+
+# More traditional heat map
+map.center <- geocode("Central Rd, Somerville, MA")
+map.center <- c(lon=map.center$lon, lat=map.center$lat)
+somerville.map = get_map(location = map.center, zoom = 14, maptype="roadmap",color = "bw")
+ggmap(somerville.map, extent = "panel", maprange=FALSE) %+% locs2 + aes(x = locs2$lon, y = locs2$lat) +
+  # geom_density2d(data = locs2, aes(x = lon, y = lat)) + # uncomment for contour lines
+  stat_density2d(data = locs2, aes(x = lon, y = lat,  fill = ..level.., alpha = ..level..),
+                 size = 0.01, bins = 16, geom = 'polygon') +
+  scale_fill_gradient(low = "green", high = "red") +
+  scale_alpha(range = c(0.00, 0.25), guide = FALSE) +
+  theme(legend.position = "none", axis.title = element_blank(), text = element_text(size = 12)) +
+  ggtitle(paste(workOrder, "Calls Since", sixtyDaysAgo))
+
+
+ggsave(paste("./plots/OneOff/",workOrder, "_map_Heat2.png", sep=""), dpi=250, width=6, height=5)
+
