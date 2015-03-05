@@ -23,11 +23,14 @@ d <- tbl_df(d)
 today <- Sys.Date()
 yesterday <- today - 1
 sixtyDaysAgo <- today - 60
+YearAgo <- today - 365
+
 
 d$Date <- as.Date(d$Date, "%m/%d/%Y")
+d$Year <- format(d$Date, '%Y')
 d$Year.Month <- format(d$Date, '%Y-%m')
 d$Month <- format(d$Date, '%m')
-d$Year <- format(d$Date, '%Y')
+d$YearDay <- yday(d$Date)
 
 d$DaysAgo <- difftime(d$Date, today, units = "days")
 
@@ -41,6 +44,8 @@ pinkish_red = "#e74c3c"
 purple = "#9b59b6"
 teele = "#1abc9c"
 nice_blue = "#2980b9"
+
+my_color = nice_blue
 
 
 my.theme <- 
@@ -67,14 +72,21 @@ d$Service.Type <- gsub("/", "-", d$Service.Type) # take out / because it makes i
 # First look at work order to see what to put below
 sort(unique(d$Service.Type))
 
+
+
+#############################################################
+
+
+
+
 # Then copy and paste it into the quotes below and run the following code
-workOrder <- "Health-Snow-Sidewalk not Shoveled"
+workOrder <- "DPW-Snow-Removal"
 
 workOrderData <- d %>%
   filter(Service.Type == workOrder)
 
 
-### Time Series
+#### Time Series ####
 days <- workOrderData %>%
   group_by(Date) %>%
   summarise(Events = n())
@@ -90,7 +102,7 @@ ts[is.na(ts)] <- 0
 remove(allDays, days)
 
 ggplot(ts, aes(x=Date, y=Events)) + 
-  geom_line(colour=pinkish_red, size = .5) + 
+  geom_line(colour=my_color, size = .5) + 
   my.theme + ggtitle(paste(workOrder, "Calls Over Time")) + xlab("Time") +
   ylab("Daily Calls") + 
   scale_y_continuous(labels = comma)
@@ -98,20 +110,7 @@ ggplot(ts, aes(x=Date, y=Events)) +
 ggsave(paste("./plots/OneOff/",workOrder, "_DailyTimeSeries.png", sep=""), dpi=250, width=5, height=3)
 
 
-# Now a recent time series
-tsr <- ts %>%
-  filter(Date > sixtyDaysAgo)
-
-ggplot(tsr, aes(x=Date, y=Events)) + 
-  geom_line(colour=pinkish_red, size = .5) + 
-  my.theme + ggtitle(paste(workOrder, "Calls Over Time")) + xlab("Time") +
-  ylab("Daily Calls") + 
-  scale_y_continuous(labels = comma)
-
-ggsave(paste("./plots/OneOff/",workOrder, "_RecentDailyTimeSeries.png", sep=""), dpi=250, width=5, height=3)
-
-
-# Now a monthly 
+# Monthly time series 
 tsm <- ts %>%
   mutate(Year.Month = format(Date, '%Y-%m')) %>%
   group_by(Year.Month) %>%
@@ -119,15 +118,112 @@ tsm <- ts %>%
   mutate(Year.Month = as.Date(paste(Year.Month,1,sep="-"),"%Y-%m-%d"))
 
 ggplot(tsm, aes(x=Year.Month, y=Events, group = 1)) + 
-  geom_line(colour=pinkish_red, size = .5) + 
+  geom_line(colour=my_color, size = .5) + 
   my.theme + ggtitle(paste(workOrder, "Calls Over Time")) + xlab("Time") +
   ylab("Monthly Calls") + 
   scale_y_continuous(labels = comma) + scale_x_date(labels=date_format("%Y"))
 
 ggsave(paste("./plots/OneOff/",workOrder, "_MonthlyTimeSeries.png", sep=""), dpi=250, width=5, height=3)
 
+ggplot(tsm, aes(x=Year.Month, y=Events, group = 1)) + 
+  geom_bar(stat='identity', fill=my_color) + 
+  my.theme + ggtitle(paste(workOrder, "Calls Over Time")) + xlab("Time") +
+  ylab("Monthly Calls") + 
+  scale_y_continuous(labels = comma) + scale_x_date(labels=date_format("%Y"))
+
+ggsave(paste("./plots/OneOff/",workOrder, "_MonthlyTimeSeriesBar.png", sep=""), dpi=250, width=5, height=3)
 
 
+# Recent monthly time series
+tsrm <- tsm %>%
+  filter(Year.Month > YearAgo)
+
+ggplot(tsrm, aes(x=Year.Month, y=Events, group = 1)) + 
+  geom_bar(stat='identity', fill=my_color) + 
+  my.theme + ggtitle(paste(workOrder, ": Last 12 Months")) + xlab("Month") +
+  ylab("Monthly Calls") + 
+  scale_y_continuous(labels = comma) + scale_x_date(labels=date_format("%b %Y"))
+
+ggsave(paste("./plots/OneOff/",workOrder, "_MonthlyTimeSeriesBarRecent.png", sep=""), dpi=250, width=5, height=3)
+
+
+# Very recent daily time series
+tsr <- ts %>%
+  filter(Date > sixtyDaysAgo)
+
+ggplot(tsr, aes(x=Date, y=Events)) + 
+  geom_line(colour=my_color, size = .5) + 
+  my.theme + ggtitle(paste(workOrder, ": Last 60 Days")) + xlab("Day") +
+  ylab("Daily Calls") + 
+  scale_y_continuous(labels = comma)
+
+ggsave(paste("./plots/OneOff/",workOrder, "_VeryRecentDailyTimeSeries.png", sep=""), dpi=250, width=5, height=3)
+
+ggplot(tsr, aes(x=Date, y=Events)) + 
+  geom_bar(stat='identity', fill=my_color) + 
+  my.theme + ggtitle(paste(workOrder, ": Last 60 Days")) + xlab("Day") +
+  ylab("Daily Calls") + 
+  scale_y_continuous(labels = comma)
+
+ggsave(paste("./plots/OneOff/",workOrder, "_VeryRecentDailyTimeSeriesBar.png", sep=""), dpi=250, width=5, height=3)
+
+
+### Year to Date Yearly Comparison
+JustYtD <- workOrderData %>%
+  filter(YearDay <= yday(today))
+
+AnnualYtD <- JustYtD %>%
+  group_by(Year) %>%
+  summarise(Events = n()) 
+
+ggplot(AnnualYtD, aes(x=Year, y=Events)) + 
+  geom_bar(stat='identity', fill=my_color) + 
+  my.theme + ggtitle(paste(workOrder, ": Year to Date")) + xlab("Year") +
+  ylab("YtD Calls") + 
+  scale_y_continuous(labels = comma)
+
+ggsave(paste("./plots/OneOff/",workOrder, "_YeartoDateBar.png", sep=""), dpi=250, width=5, height=3)
+
+
+# More recent ytd
+RecentYtD <- JustYtD %>%
+  group_by(Year) %>%
+  summarise(Events = n()) %>%
+  filter(Year > 2010)
+
+ggplot(RecentYtD, aes(x=Year, y=Events)) + 
+  geom_bar(stat='identity', fill=my_color) + 
+  my.theme + ggtitle(paste(workOrder, ": Year to Date")) + xlab("Year") +
+  ylab("YtD Calls") + 
+  scale_y_continuous(labels = comma)
+
+ggsave(paste("./plots/OneOff/",workOrder, "_YeartoDateBarRecent.png", sep=""), dpi=250, width=5, height=3)
+
+
+
+
+##### Descriptive stats ouput to a readme.txt ####
+
+# Difference in YtD
+thisYear <- nrow(AnnualYtD)
+PerChange <- (AnnualYtD$Events[thisYear] - AnnualYtD$Events[thisYear - 1]) / AnnualYtD$Events[thisYear]
+GrowthOrDecline <- ifelse(PerChange > 0, "are up by", "are down by")
+
+
+# start writing out
+# This makes the .txt report
+sink(paste("./plots/OneOff/",workOrder, "_ReadMe.txt", sep=""))
+
+cat(sprintf("Year to Date there have been %s calls for %s. Last year during the same time frame there were %s, which means calls for this work order %s %s percent \n", AnnualYtD$Events[thisYear], workOrder, AnnualYtD$Events[thisYear-1], GrowthOrDecline, round((PerChange * 100))))
+
+
+# Stop writing to the file
+sink()
+
+
+
+
+#############################################################
 #### Maps ####
 
 workOrderDataRecent <- filter(workOrderData, DaysAgo >= -30)
