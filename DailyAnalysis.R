@@ -80,10 +80,31 @@ sort(unique(d$Service.Type))
 
 
 # Then copy and paste it into the quotes below and run the following code
-workOrder <- "DPW-Snow-Removal"
+workOrder <- "DPW-Pothole"
 
 workOrderData <- d %>%
   filter(Service.Type == workOrder)
+
+
+# #### Optional : remove common DPW reporters to winnow down to consitutent calls ####
+# # alldpwreporters <- c("WORKER, DPW", "BUNKER, DAVE", "MAN, REPORT", ", DPW WORKER", "MORIN, CHRISTINE",
+#                   ", GINO", "HARDY, DANNY", "HARDY, DANNY", "CASSESSO, CHRIS",
+#                   "BARBIERE, JEFF", "HARDY, DANIEL", "BUNK, DAVE", "WOODS, JIMMY",
+#                   "MACEACHERN, STEVEN", "ROSS, STEVE", "CORBIN, FRANKIE", "BROWN, KIM",
+#                   "BUNKER, DAVID", "CORBIN, FRANK", "WALSH, JOHN")
+# 
+# # Note that most of these are reporting as, or on behalf of, citizens, so I use the shorter list
+# # to distinguish work that is being tracked in real-time by DPW from legitimate reports from 
+# # citizens or city workers
+# 
+# dpwreporters <- c("WORKER, DPW", "BUNKER, DAVE", "MAN, REPORT", ", DPW WORKER", ", GINO",
+#                   "HARDY, DANNY", "HARDY, DANNY", "CASSESSO, CHRIS")
+# 
+# workOrderData$dpwreporters <- ifelse(workOrderData$Citizen.Name %in% dpwreporters, "yes", "no")
+# 
+# workOrderData <- workOrderData %>%
+#   filter(dpwreporters == "no") %>%
+#   select(-dpwreporters)
 
 
 #### Time Series ####
