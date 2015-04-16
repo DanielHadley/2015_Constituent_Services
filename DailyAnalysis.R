@@ -10,6 +10,7 @@ library(ggplot2)
 library(scales)
 library(ggmap)
 library(lubridate)
+library(beepr)
 
 setwd("K:/Somerstat/Common/Data/2015_Constituent_Services")
 
@@ -243,7 +244,6 @@ sink()
 
 
 
-
 #############################################################
 #### Maps ####
 
@@ -355,4 +355,8 @@ ggmap(somerville.map, extent = "panel", maprange=FALSE) %+% locs2 + aes(x = locs
 
 
 ggsave(paste("./plots/OneOff/",workOrder, "_map_Heat2.png", sep=""), dpi=250, width=6, height=5)
+
+
+
+beep(4)
 
