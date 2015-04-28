@@ -14,4 +14,4 @@ Warning message:
 closing unused connection 3 (./data/Daily.csv) 
 > proc.time()
    user  system elapsed 
-  32.21   11.38  390.00 
+  32.63   12.19  333.49 

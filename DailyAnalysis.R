@@ -25,6 +25,9 @@ today <- Sys.Date()
 yesterday <- today - 1
 sixtyDaysAgo <- today - 60
 YearAgo <- today - 365
+TwoYearsAgo <- YearAgo - 365
+ThreeYearsAgo <- TwoYearsAgo - 365
+FourYearsAgo <- ThreeYearsAgo - 365
 
 
 d$Date <- as.Date(d$Date, "%m/%d/%Y")
@@ -81,7 +84,7 @@ sort(unique(d$Service.Type))
 
 
 # Then copy and paste it into the quotes below and run the following code
-workOrder <- "DPW-Pothole"
+workOrder <- "DPW-Trash-TV-Monitor"
 
 workOrderData <- d %>%
   filter(Service.Type == workOrder)
@@ -222,14 +225,41 @@ ggplot(RecentYtD, aes(x=Year, y=Events)) +
 ggsave(paste("./plots/OneOff/",workOrder, "_YeartoDateBarRecent.png", sep=""), dpi=250, width=5, height=3)
 
 
+# Trailing 365 - a better comparison than YTD when it's early in the year
+
+workOrderData$period <- 
+  ifelse((workOrderData$Date >= YearAgo), "TrailingYear",
+         ifelse((workOrderData$Date >= TwoYearsAgo) & (workOrderData$Date < YearAgo), "PrevPer1",
+                ifelse((workOrderData$Date >= ThreeYearsAgo) & (workOrderData$Date < TwoYearsAgo), "PrevPer2",
+                       ifelse((workOrderData$Date >= FourYearsAgo) & (workOrderData$Date < ThreeYearsAgo), "PrevPer3",
+                              "LongAgo"))))
+
+TrailingYear <- workOrderData %>%
+  group_by(period) %>%
+  summarise(Events = n()) %>%
+  filter(period != "LongAgo")
+
+ggplot(TrailingYear, aes(x=period, y=Events)) + 
+  geom_bar(stat='identity', fill=my_color) + 
+  my.theme + ggtitle(paste(workOrder, ": Last 365 Days")) + xlab("Period") +
+  ylab("Calls / 365 Days") + 
+  scale_y_continuous(labels = comma)
+
+ggsave(paste("./plots/OneOff/",workOrder, "_Trailing365Days.png", sep=""), dpi=250, width=5, height=3)
+
+
 
 
 ##### Descriptive stats ouput to a readme.txt ####
 
 # Difference in YtD
 thisYear <- nrow(AnnualYtD)
-PerChange <- (AnnualYtD$Events[thisYear] - AnnualYtD$Events[thisYear - 1]) / AnnualYtD$Events[thisYear]
+PerChange <- (AnnualYtD$Events[thisYear] - AnnualYtD$Events[thisYear - 1]) / AnnualYtD$Events[thisYear - 1]
 GrowthOrDecline <- ifelse(PerChange > 0, "are up by", "are down by")
+
+# Difference in Trailing 365
+PerChangeLastYear <- (TrailingYear$Events[nrow(TrailingYear)] - TrailingYear$Event[(nrow(TrailingYear)) - 1]) / TrailingYear$Event[nrow(TrailingYear) - 1]
+GrowthOrDeclineLastYear <- ifelse(PerChangeLastYear > 0, "are up by", "are down by")
 
 
 # start writing out
@@ -237,6 +267,12 @@ GrowthOrDecline <- ifelse(PerChange > 0, "are up by", "are down by")
 sink(paste("./plots/OneOff/",workOrder, "_ReadMe.txt", sep=""))
 
 cat(sprintf("Year to Date there have been %s calls for %s. Last year during the same time frame there were %s, which means calls for this work order %s %s percent \n", AnnualYtD$Events[thisYear], workOrder, AnnualYtD$Events[thisYear-1], GrowthOrDecline, round((PerChange * 100))))
+
+cat("---\n")
+
+cat("Trailing 365 - a better comparison than YTD when it's early in the year:\n")
+
+cat(sprintf("During the last 365 days there have been %s calls for %s. During the previous 365-day time frame there were %s, which means calls for this work order %s %s percent \n", TrailingYear$Events[nrow(TrailingYear)], workOrder, TrailingYear$Event[(nrow(TrailingYear)) - 1], GrowthOrDeclineLastYear, round((PerChangeLastYear * 100))))
 
 
 # Stop writing to the file
