@@ -10,7 +10,6 @@ library(ggplot2)
 library(scales)
 library(ggmap)
 library(lubridate)
-library(beepr)
 
 setwd("K:/Somerstat/Common/Data/2015_Constituent_Services")
 
@@ -84,7 +83,7 @@ sort(unique(d$Service.Type))
 
 
 # Then copy and paste it into the quotes below and run the following code
-workOrder <- "DPW-Trash-TV-Monitor"
+workOrder <- "DPW-Traffic Signals-Outages,Blinking Yel"
 
 workOrderData <- d %>%
   filter(Service.Type == workOrder)
@@ -237,11 +236,12 @@ workOrderData$period <-
 TrailingYear <- workOrderData %>%
   group_by(period) %>%
   summarise(Events = n()) %>%
-  filter(period != "LongAgo")
+  filter(period != "LongAgo") %>%
+  mutate(period = factor(period, levels=c("PrevPer3", "PrevPer2", "PrevPer1", "TrailingYear")))
 
 ggplot(TrailingYear, aes(x=period, y=Events)) + 
   geom_bar(stat='identity', fill=my_color) + 
-  my.theme + ggtitle(paste(workOrder, ": Last 365 Days")) + xlab("Period") +
+  my.theme + ggtitle(paste(workOrder, ": Trailing 365 Days")) + xlab("Period") +
   ylab("Calls / 365 Days") + 
   scale_y_continuous(labels = comma)
 
@@ -336,27 +336,21 @@ SHmap + geom_point(
 ggsave(paste("./plots/OneOff/",workOrder, "_map_Central.png", sep=""), dpi=250, width=6, height=5)
 
 
-# Dot map 
-map.center <- geocode("Union Sq, Somerville, MA")
-SHmap <- qmap(c(lon=map.center$lon, lat=map.center$lat), source="google", zoom = 16)
-SHmap + geom_point(
-  aes(x=locs2$lon, y=locs2$lat),size = 4, alpha = .7, bins = 26, color="red", 
-  data = locs2) +
-  ggtitle(paste(workOrder, "Calls Since", sixtyDaysAgo))
+# A for loop that will create a dot map for every neighborhood you specify
+neighborhoodList <- c("Assembly Square", "Ball Square", "City Hall", "Davis Square", "East Somerville", "Gilman Square", "Magoun Square", "Porter Square", "Prospect Hill", "Spring Hill", "Teele Square", "Ten Hills", "Union Square", "Winter Hill")
 
-ggsave(paste("./plots/OneOff/",workOrder, "_map_Union.png", sep=""), dpi=250, width=6, height=5)
-
-
-# Dot map 
-map.center <- geocode("Davis Sq, Somerville, MA")
-SHmap <- qmap(c(lon=map.center$lon, lat=map.center$lat), source="google", zoom = 16)
-SHmap + geom_point(
-  aes(x=locs2$lon, y=locs2$lat),size = 4, alpha = .7, bins = 26, color="red", 
-  data = locs2) +
-  ggtitle(paste(workOrder, "Calls Since", sixtyDaysAgo))
-
-ggsave(paste("./plots/OneOff/",workOrder, "_map_Davis.png", sep=""), dpi=250, width=6, height=5)
-
+for (n in 1:(length(neighborhoodList))) {
+  map <- get_map(location = paste(neighborhoodList[n], "Somerville, MA", sep=", "), zoom=16, maptype="roadmap", color = "bw")
+  ggmap(map) +
+    geom_point(data=locs2,size=4, color = "red", alpha = .5,
+               aes(x=lon,y=lat)) +
+    labs(x="",y="") +
+    theme(axis.text=element_blank(),axis.ticks=element_blank()) +
+    ggtitle(neighborhoodList[n])
+  
+  ggsave(paste("./plots/OneOff/",workOrder, "_map_",neighborhoodList[n], ".png", sep=""), dpi=250, width=6, height=5)
+  
+}
 
 
 # More traditional heat map
@@ -393,6 +387,4 @@ ggmap(somerville.map, extent = "panel", maprange=FALSE) %+% locs2 + aes(x = locs
 ggsave(paste("./plots/OneOff/",workOrder, "_map_Heat2.png", sep=""), dpi=250, width=6, height=5)
 
 
-
-beep(4)
 
