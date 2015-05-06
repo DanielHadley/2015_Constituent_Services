@@ -83,7 +83,7 @@ sort(unique(d$Service.Type))
 
 
 # Then copy and paste it into the quotes below and run the following code
-workOrder <- "DPW-Traffic Signals-Outages,Blinking Yel"
+workOrder <- "DPW-Trees-arborist"
 
 workOrderData <- d %>%
   filter(Service.Type == workOrder)
@@ -337,7 +337,7 @@ ggsave(paste("./plots/OneOff/",workOrder, "_map_Central.png", sep=""), dpi=250, 
 
 
 # A for loop that will create a dot map for every neighborhood you specify
-neighborhoodList <- c("Assembly Square", "Ball Square", "City Hall", "Davis Square", "East Somerville", "Gilman Square", "Magoun Square", "Porter Square", "Prospect Hill", "Spring Hill", "Teele Square", "Ten Hills", "Union Square", "Winter Hill")
+neighborhoodList <- c("Assembly Square", "Ball Square", "Davis Square", "East Somerville", "Gilman Square", "Magoun Square", "Porter Square", "Prospect Hill", "Spring Hill", "Teele Square", "Ten Hills", "Union Square", "Winter Hill")
 
 for (n in 1:(length(neighborhoodList))) {
   map <- get_map(location = paste(neighborhoodList[n], "Somerville, MA", sep=", "), zoom=16, maptype="roadmap", color = "bw")
@@ -346,9 +346,9 @@ for (n in 1:(length(neighborhoodList))) {
                aes(x=lon,y=lat)) +
     labs(x="",y="") +
     theme(axis.text=element_blank(),axis.ticks=element_blank()) +
-    ggtitle(neighborhoodList[n])
+    ggtitle(paste(workOrder, neighborhoodList[n]))
   
-  ggsave(paste("./plots/OneOff/",workOrder, "_map_",neighborhoodList[n], ".png", sep=""), dpi=250, width=6, height=5)
+  ggsave(paste("./plots/OneOff/",workOrder, "_NB_map_",neighborhoodList[n], ".png", sep=""), dpi=250, width=6, height=5)
   
 }
 
