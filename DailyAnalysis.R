@@ -14,7 +14,7 @@ library(lubridate)
 setwd("K:/Somerstat/Common/Data/2015_Constituent_Services")
 
 # Load data
-d <- read.csv("./raw_data/Daily.csv")
+d <- read.csv("./data/Daily.csv")
 
 # Converts data to tbl class. tbl's are easier to examine than data frames. R displays only the data that fits onscreen:
 d <- tbl_df(d)
