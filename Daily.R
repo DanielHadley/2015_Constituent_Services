@@ -3,7 +3,7 @@
 
 
 # working Directory and packages #
-setwd("c:/Users/dhadley/Documents/GitHub/2015_Constituent_Services")
+setwd("K:/Somerstat/Common/Data/2015_Constituent_Services")
 
 
 library(RCurl)
@@ -36,7 +36,7 @@ d <- read.table(f, sep=',', dec='.', header=TRUE, fill = TRUE)
 
 
 # Write it to the K drive
-write.csv(d, "//fileshare1/Departments/Somerstat/Common/Data/2015_Constituent_Services/raw_data/Daily.csv")
+write.csv(d, "//fileshare1/Departments/Somerstat/Common/Data/2015_Constituent_Services/data/Daily.csv")
 
 
 # Remove everything else
