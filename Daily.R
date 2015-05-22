@@ -35,8 +35,8 @@ f <- file('./data/Daily.csv', open="r", encoding="UTF-16LE")
 d <- read.table(f, sep=',', dec='.', header=TRUE, fill = TRUE)
 
 
-# Write it to the K drive
-write.csv(d, "//fileshare1/Departments/Somerstat/Common/Data/2015_Constituent_Services/data/Daily.csv")
+# Write it to the P: drive
+write.csv(d, "//fileshare1/Departments2/Somerstat Data/Constituent_Services/Daily.csv")
 
 
 # Remove everything else
@@ -98,5 +98,5 @@ ggplot(LastTwentyFour, aes(x=reorder(Service.Type, count)  , y=count)) +
 
 # ggsave(paste("./plots/daily/", yesterday, "_LastTwentyFour.png", sep=""), dpi=300, width=5, height=5)
 ggsave("./plots/daily/LastTwentyFour.png", dpi=300, width=5, height=5)
-ggsave("//fileshare1/Departments/Somerstat/Common/Data/2015_Constituent_Services/plots/LastTwentyFour.png", dpi=300, width=5, height=5)
+ggsave("//fileshare1/Departments2/Somerstat Data/Constituent_Services/plots/LastTwentyFour.png", dpi=300, width=5, height=5)
 
