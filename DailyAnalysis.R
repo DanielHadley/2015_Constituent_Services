@@ -22,6 +22,7 @@ d <- tbl_df(d)
 # dates
 today <- Sys.Date()
 yesterday <- today - 1
+thirtyDaysAgo <- today - 30
 sixtyDaysAgo <- today - 60
 YearAgo <- today - 365
 TwoYearsAgo <- YearAgo - 365
@@ -298,7 +299,7 @@ SHmap <- qmap(c(lon=map.center$lon, lat=map.center$lat), source="google", zoom =
 SHmap + geom_point(
   aes(x=locs2$lon, y=locs2$lat),size = 3, alpha = .7, bins = 26, color="red", 
   data = locs2) +
-  ggtitle(paste(workOrder, "Calls Since", sixtyDaysAgo))
+  ggtitle(paste(workOrder, "Calls Since", thirtyDaysAgo))
 
 ggsave(paste("./plots/OneOff/",workOrder, "_map.png", sep=""), dpi=250, width=6, height=5)
 
@@ -309,7 +310,7 @@ SHmap <- qmap(c(lon=map.center$lon, lat=map.center$lat), source="google", zoom =
 SHmap + geom_point(
   aes(x=locs2$lon, y=locs2$lat),size = 3, alpha = .7, bins = 26, color="red", 
   data = locs2) +
-  ggtitle(paste(workOrder, "Calls Since", sixtyDaysAgo))
+  ggtitle(paste(workOrder, "Calls Since", thirtyDaysAgo))
 
 ggsave(paste("./plots/OneOff/",workOrder, "_map_East.png", sep=""), dpi=250, width=6, height=5)
 
@@ -320,7 +321,7 @@ SHmap <- qmap(c(lon=map.center$lon, lat=map.center$lat), source="google", zoom =
 SHmap + geom_point(
   aes(x=locs2$lon, y=locs2$lat),size = 3, alpha = .7, bins = 26, color="red", 
   data = locs2) +
-  ggtitle(paste(workOrder, "Calls Since", sixtyDaysAgo))
+  ggtitle(paste(workOrder, "Calls Since", thirtyDaysAgo))
 
 ggsave(paste("./plots/OneOff/",workOrder, "_map_West.png", sep=""), dpi=250, width=6, height=5)
 
@@ -331,7 +332,7 @@ SHmap <- qmap(c(lon=map.center$lon, lat=map.center$lat), source="google", zoom =
 SHmap + geom_point(
   aes(x=locs2$lon, y=locs2$lat),size = 3, alpha = .7, bins = 26, color="red", 
   data = locs2) +
-  ggtitle(paste(workOrder, "Calls Since", sixtyDaysAgo))
+  ggtitle(paste(workOrder, "Calls Since", thirtyDaysAgo))
 
 ggsave(paste("./plots/OneOff/",workOrder, "_map_Central.png", sep=""), dpi=250, width=6, height=5)
 
@@ -363,8 +364,11 @@ ggmap(somerville.map, extent = "panel", maprange=FALSE) %+% locs2 + aes(x = locs
                  size = 0.01, bins = 16, geom = 'polygon') +
   scale_fill_gradient(low = "green", high = "red") +
   scale_alpha(range = c(0.00, 0.25), guide = FALSE) +
-  theme(legend.position = "none", axis.title = element_blank(), text = element_text(size = 12)) +
-  ggtitle(paste(workOrder, "Calls Since", sixtyDaysAgo))
+  theme(legend.position = "none", axis.title = element_blank(), 
+        axis.ticks = element_blank(),
+        axis.text = element_blank(),
+        text = element_text(size = 12)) +
+  ggtitle(paste(workOrder, "Calls Since", thirtyDaysAgo))
 
 
 ggsave(paste("./plots/OneOff/",workOrder, "_map_Heat1.png", sep=""), dpi=250, width=6, height=5)
@@ -380,8 +384,11 @@ ggmap(somerville.map, extent = "panel", maprange=FALSE) %+% locs2 + aes(x = locs
                  size = 0.01, bins = 16, geom = 'polygon') +
   scale_fill_gradient(low = "green", high = "red") +
   scale_alpha(range = c(0.00, 0.25), guide = FALSE) +
-  theme(legend.position = "none", axis.title = element_blank(), text = element_text(size = 12)) +
-  ggtitle(paste(workOrder, "Calls Since", sixtyDaysAgo))
+  theme(legend.position = "none", axis.title = element_blank(), 
+        axis.ticks = element_blank(),
+        axis.text = element_blank(),
+        text = element_text(size = 12)) +
+  ggtitle(paste(workOrder, "Calls Since", thirtyDaysAgo))
 
 
 ggsave(paste("./plots/OneOff/",workOrder, "_map_Heat2.png", sep=""), dpi=250, width=6, height=5)
