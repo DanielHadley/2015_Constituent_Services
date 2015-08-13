@@ -11,7 +11,14 @@ library(dplyr)
 library(ggplot2)
 library(scales) # for changing from scientific notation
 library(tidyr)
+library(jsonlite)
 
+# QSend API
+api <- "https://somervillema.qscend.com/qalert/api/v1/requests/get/?key=5c2b987d13cc414cb26f956cf31fbffc8ca62dc37d1a4f6bba3cc74398162db5"
+
+d <- fromJSON(api)
+
+chi <- read.csv(url(api))
 
 
 #### Download Daily DATA ####
@@ -35,8 +42,9 @@ f <- file('./data/Daily.csv', open="r", encoding="UTF-16LE")
 d <- read.table(f, sep=',', dec='.', header=TRUE, fill = TRUE)
 
 
-# Write it to the P: drive
+# Write it to the P: drive and my local
 write.csv(d, "//fileshare1/Departments2/Somerstat Data/Constituent_Services/Daily.csv")
+write.csv(d, "./data/Daily.csv")
 
 
 # Remove everything else

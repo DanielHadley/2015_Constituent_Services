@@ -12,8 +12,5 @@ The following objects are masked from 'package:base':
 
     intersect, setdiff, setequal, union
 
-Warning message:
-closing unused connection 3 (./data/Daily.csv) 
-> proc.time()
-   user  system elapsed 
-  25.03    6.08  525.88 
+Error: could not find function "fromJSON"
+Execution halted
