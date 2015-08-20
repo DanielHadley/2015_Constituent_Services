@@ -1,5 +1,5 @@
 #### Created 10/14 by Daniel Hadley to load and analyze 311 Data ####
-# The FTP site was created by Ahmod at Intelligov
+# Updated 8/15 for Qsend
 
 
 # working Directory and packages #
@@ -12,102 +12,57 @@ library(ggplot2)
 library(scales) # for changing from scientific notation
 library(tidyr)
 library(jsonlite)
-
-# QSend API Just the Basics. This works but only sends back 5000
-api <- "https://somervillema.qscend.com/qalert/api/v1/requests/get/?key=5c2b987d13cc414cb26f956cf31fbffc8ca62dc37d1a4f6bba3cc74398162db5"
-
-d <- fromJSON(api)
-
-chi <- read.csv(url(api))
+library(lubridate)
 
 
-
-# QSend API Not working
-api <- "https://somervillema.qscend.com/qalert/api/v1/requests/get/?createDateMax=1441080000000&key=5c2b987d13cc414cb26f956cf31fbffc8ca62dc37d1a4f6bba3cc74398162db5"
-
-d <- fromJSON(api)
-
-chi <- read.csv(url(api))
+#### Load Data & Update via QSend API ####
+# I leave out reqcustom, attachment, and deleted
+activity <- read.csv("./data/activity.csv")
+submitter <- read.csv("./data/submitter.csv")
+request <- read.csv("./data/request.csv")
 
 
-# QSend API 
-api <- "https://somervillema.qscend.com/qalert/api/v1/requests/get/?createDateMin=7%2F1%2F2015&key=5c2b987d13cc414cb26f956cf31fbffc8ca62dc37d1a4f6bba3cc74398162db5"
+# Changes since x
+# I do five days ago in case there is a problem for one or two days with the system
+since <- Sys.Date() - 5
+
+api <- paste("https://somervillema.qscend.com/qalert/api/v1/requests/changes/?since=", month(since), "%2F", day(since), "%2F", year(since), "&key=5c2b987d13cc414cb26f956cf31fbffc8ca62dc37d1a4f6bba3cc74398162db5", sep = "")
 
 d <- fromJSON(api)
 
+activityChanges <- d$activity
+submitterChanges <- d$submitter
+requestChanges <- d$request
 
 
+# Now merge the dataframes
+
+# Merge and get rid of dupes for activity
+activityUpdated <- rbind(activity, activityChanges)
+activityUpdated <- distinct(activityUpdated)
+
+# Overwrite for request & submitter
+# A clever method: 
+# http://stackoverflow.com/questions/28282484/join-two-dataframes-and-overwrite-matching-rows-r
+requestUpdated <- rbind(requestChanges, request[!request$id %in% requestChanges$id,])
+submitterUpdated <- rbind(submitterChanges, submitter[!submitter$id %in% submitterChanges$id,])
 
 
-
-# QSend API 
-api <- "https://somervillema.qscend.com/qalert/api/v1/requests/get/?pagesize=500&key=5c2b987d13cc414cb26f956cf31fbffc8ca62dc37d1a4f6bba3cc74398162db5"
-
-d <- fromJSON(api)
-
-
-
-# QSend API 
-api <- "https://somervillema.qscend.com/qalert/api/v1/requests/get/?page=2&pagesize=500&key=5c2b987d13cc414cb26f956cf31fbffc8ca62dc37d1a4f6bba3cc74398162db5"
-
-d <- fromJSON(api)
-
-
-d <- fromJSON("")
-
-
-
-# #### The initial Data dump ####
-# # QSend API undocumented method to get all data
-# 
-# api <- "https://somervillema.qscend.com/qalert/api/v1/requests/dump/?start=7%2F1%2F2015&key=5c2b987d13cc414cb26f956cf31fbffc8ca62dc37d1a4f6bba3cc74398162db5"
-# 
-# d <- fromJSON(api)
-# 
-# request <- d$request
-# activity <- d$activity
-# attachment <- d$attachment
-# submitter <- d$submitter
-# deleted <- d$deleted
-# reqcustom <- d$reqcustom
-# 
-# write.csv(request, "./data/2015_08_20_Qalert_Data_Dump/request.csv", row.names = FALSE)
-# write.csv(activity, "./data/2015_08_20_Qalert_Data_Dump/activity.csv", row.names = FALSE)
-# write.csv(attachment, "./data/2015_08_20_Qalert_Data_Dump/attachment.csv", row.names = FALSE)
-# write.csv(submitter, "./data/2015_08_20_Qalert_Data_Dump/submitter.csv", row.names = FALSE)
-# write.csv(deleted, "./data/2015_08_20_Qalert_Data_Dump/deleted.csv", row.names = FALSE)
-# write.csv(reqcustom, "./data/2015_08_20_Qalert_Data_Dump/reqcustom.csv", row.names = FALSE)
-
-
-
-#### Download Daily DATA ####
-# First retreive the monthly data from the ftp server maintained by Intelligov
-# This has all the work orders/quick tickets, and data on how quickly they are completed
-url<-c("sftp://somervillemadata@ftp2.ciacorp.com/311DailyAllMonthDataDump.csv")
-x <-getBinaryURL(url, userpwd="somervillemadata:today123")
-
-# Write it 
-# http://stackoverflow.com/questions/18833031/download-rdata-and-csv-files-from-ftp-using-rcurl-or-any-other-method
-writeBin(x, "./data/Daily.csv")
-
-# Read it
-# I had problems with the encoding, so I added the f <- file 
-# http://stackoverflow.com/questions/4806823/how-to-detect-the-right-encoding-for-read-csv
-f <- file('./data/Daily.csv', open="r", encoding="UTF-16LE")
-
-# Turn it into a dataframe
-# At first I got an error, so I added the fill=TRUE 
-# http://stackoverflow.com/questions/18161009/error-in-reading-in-data-set-in-r
-d <- read.table(f, sep=',', dec='.', header=TRUE, fill = TRUE)
-
+#### Write it ####
 
 # Write it to the P: drive and my local
-write.csv(d, "//fileshare1/Departments2/Somerstat Data/Constituent_Services/Daily.csv")
-write.csv(d, "./data/Daily.csv")
+write.csv(requestUpdated, "//fileshare1/Departments2/Somerstat Data/Constituent_Services/data/request.csv", row.names = FALSE)
+write.csv(requestUpdated, "./data/request.csv", row.names = FALSE)
+
+write.csv(activityUpdated, "//fileshare1/Departments2/Somerstat Data/Constituent_Services/data/activity.csv", row.names = FALSE)
+write.csv(activityUpdated, "./data/activity.csv", row.names = FALSE)
+
+write.csv(submitterUpdated, "//fileshare1/Departments2/Somerstat Data/Constituent_Services/data/submitter.csv", row.names = FALSE)
+write.csv(submitterUpdated, "./data/submitter.csv", row.names = FALSE)
 
 
 # Remove everything else
-remove(f, url, x)
+remove(activity, activityChanges, request, requestChanges, submitter, submitterChanges, d)
 
 
 
@@ -139,25 +94,25 @@ my.theme <-
 today <- Sys.Date()
 yesterday <- today - 1
 
-d$Date <- as.Date(d$Date, "%m/%d/%Y")
-d$Year.Month <- format(d$Date, '%Y-%m')
-d$Month <- format(d$Date, '%m')
-d$Year <- format(d$Date, '%Y')
+requestUpdated$Date <- as.Date(requestUpdated$displayDate, "%m/%d/%Y")
+requestUpdated$Year.Month <- format(requestUpdated$Date, '%Y-%m')
+requestUpdated$Month <- format(requestUpdated$Date, '%m')
+requestUpdated$Year <- format(requestUpdated$Date, '%Y')
 
-d$DaysAgo <- difftime(d$Date, today, units = "days")
+requestUpdated$DaysAgo <- difftime(requestUpdated$Date, today, units = "days")
 
 
 
 
 #### Top from last day #### 
 
-LastTwentyFour <- d %>%
-  filter(DaysAgo > -2) %>%
-  group_by(Service.Type) %>%
+LastTwentyFour <- requestUpdated %>%
+  filter(DaysAgo > -1) %>%
+  group_by(typeName) %>%
   summarize(count=n()) %>%
   filter(count > 5)
 
-ggplot(LastTwentyFour, aes(x=reorder(Service.Type, count)  , y=count)) + 
+ggplot(LastTwentyFour, aes(x=reorder(typeName, count)  , y=count)) + 
   geom_bar(stat = "identity", colour="white", fill=nice_blue) + 
   my.theme + ggtitle(paste("Top Work Orders From Yesterday:", yesterday)) + xlab("Request") +
   ylab("# of Requests") + 
@@ -166,4 +121,33 @@ ggplot(LastTwentyFour, aes(x=reorder(Service.Type, count)  , y=count)) +
 # ggsave(paste("./plots/daily/", yesterday, "_LastTwentyFour.png", sep=""), dpi=300, width=5, height=5)
 ggsave("./plots/daily/LastTwentyFour.png", dpi=300, width=5, height=5)
 ggsave("//fileshare1/Departments2/Somerstat Data/Constituent_Services/plots/LastTwentyFour.png", dpi=300, width=5, height=5)
+
+
+
+
+
+
+
+# Footnotes
+# #### The initial Data dump ####
+# # QSend API undocumented method to get all data
+# 
+# api <- "https://somervillema.qscend.com/qalert/api/v1/requests/dump/?start=7%2F1%2F2015&key=5c2b987d13cc414cb26f956cf31fbffc8ca62dc37d1a4f6bba3cc74398162db5"
+# 
+# d <- fromJSON(api)
+# 
+# request <- d$request
+# activity <- d$activity
+# attachment <- d$attachment
+# submitter <- d$submitter
+# deleted <- d$deleted
+# reqcustom <- d$reqcustom
+# 
+# write.csv(request, "./data/2015_08_20_Qalert_Data_Dump/request.csv", row.names = FALSE)
+# write.csv(activity, "./data/2015_08_20_Qalert_Data_Dump/activity.csv", row.names = FALSE)
+# write.csv(attachment, "./data/2015_08_20_Qalert_Data_Dump/attachment.csv", row.names = FALSE)
+# write.csv(submitter, "./data/2015_08_20_Qalert_Data_Dump/submitter.csv", row.names = FALSE)
+# write.csv(deleted, "./data/2015_08_20_Qalert_Data_Dump/deleted.csv", row.names = FALSE)
+# write.csv(reqcustom, "./data/2015_08_20_Qalert_Data_Dump/reqcustom.csv", row.names = FALSE)
+
 
