@@ -57,12 +57,27 @@ d <- fromJSON("")
 
 
 
+# #### The initial Data dump ####
+# # QSend API undocumented method to get all data
+# 
+# api <- "https://somervillema.qscend.com/qalert/api/v1/requests/dump/?start=7%2F1%2F2015&key=5c2b987d13cc414cb26f956cf31fbffc8ca62dc37d1a4f6bba3cc74398162db5"
+# 
+# d <- fromJSON(api)
+# 
+# request <- d$request
+# activity <- d$activity
+# attachment <- d$attachment
+# submitter <- d$submitter
+# deleted <- d$deleted
+# reqcustom <- d$reqcustom
+# 
+# write.csv(request, "./data/2015_08_20_Qalert_Data_Dump/request.csv", row.names = FALSE)
+# write.csv(activity, "./data/2015_08_20_Qalert_Data_Dump/activity.csv", row.names = FALSE)
+# write.csv(attachment, "./data/2015_08_20_Qalert_Data_Dump/attachment.csv", row.names = FALSE)
+# write.csv(submitter, "./data/2015_08_20_Qalert_Data_Dump/submitter.csv", row.names = FALSE)
+# write.csv(deleted, "./data/2015_08_20_Qalert_Data_Dump/deleted.csv", row.names = FALSE)
+# write.csv(reqcustom, "./data/2015_08_20_Qalert_Data_Dump/reqcustom.csv", row.names = FALSE)
 
-# QSend API undocumented method to get all data
-
-api <- "https://somervillema.qscend.com/qalert/api/v1/requests/dump/?start=7%2F1%2F2015&key=5c2b987d13cc414cb26f956cf31fbffc8ca62dc37d1a4f6bba3cc74398162db5"
-
-d <- fromJSON(api)
 
 
 #### Download Daily DATA ####
