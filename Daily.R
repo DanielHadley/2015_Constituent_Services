@@ -13,12 +13,56 @@ library(scales) # for changing from scientific notation
 library(tidyr)
 library(jsonlite)
 
-# QSend API
+# QSend API Just the Basics. This works but only sends back 5000
 api <- "https://somervillema.qscend.com/qalert/api/v1/requests/get/?key=5c2b987d13cc414cb26f956cf31fbffc8ca62dc37d1a4f6bba3cc74398162db5"
 
 d <- fromJSON(api)
 
 chi <- read.csv(url(api))
+
+
+
+# QSend API Not working
+api <- "https://somervillema.qscend.com/qalert/api/v1/requests/get/?createDateMax=1441080000000&key=5c2b987d13cc414cb26f956cf31fbffc8ca62dc37d1a4f6bba3cc74398162db5"
+
+d <- fromJSON(api)
+
+chi <- read.csv(url(api))
+
+
+# QSend API 
+api <- "https://somervillema.qscend.com/qalert/api/v1/requests/get/?createDateMin=7%2F1%2F2015&key=5c2b987d13cc414cb26f956cf31fbffc8ca62dc37d1a4f6bba3cc74398162db5"
+
+d <- fromJSON(api)
+
+
+
+
+
+
+# QSend API 
+api <- "https://somervillema.qscend.com/qalert/api/v1/requests/get/?pagesize=500&key=5c2b987d13cc414cb26f956cf31fbffc8ca62dc37d1a4f6bba3cc74398162db5"
+
+d <- fromJSON(api)
+
+
+
+# QSend API 
+api <- "https://somervillema.qscend.com/qalert/api/v1/requests/get/?page=2&pagesize=500&key=5c2b987d13cc414cb26f956cf31fbffc8ca62dc37d1a4f6bba3cc74398162db5"
+
+d <- fromJSON(api)
+
+
+d <- fromJSON("")
+
+
+
+
+# QSend API undocumented method to get all data
+
+api <- "https://somervillema.qscend.com/qalert/api/v1/requests/dump/?start=7%2F1%2F2015&key=5c2b987d13cc414cb26f956cf31fbffc8ca62dc37d1a4f6bba3cc74398162db5"
+
+d <- fromJSON(api)
 
 
 #### Download Daily DATA ####
