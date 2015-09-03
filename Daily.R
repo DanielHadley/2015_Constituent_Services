@@ -13,6 +13,7 @@ library(scales) # for changing from scientific notation
 library(tidyr)
 library(jsonlite)
 library(lubridate)
+library(httr) # Upload to Socrata
 
 
 #### Load Data & Update via QSend API ####
@@ -72,6 +73,36 @@ write.csv(reqcustomUpdated, "./data/reqcusreqcustom.csv", row.names = FALSE)
 # Remove everything else
 remove(activity, activityChanges, request, requestChanges, submitter, submitterChanges, reqcustom, reqcustomChanges, d)
 
+
+#### Prepare a singe datset for upload to Socrata and elsewhere ####
+# the summarise is the way to get the latest action by using which.max
+lastAction <- activityUpdated  %>%
+  filter(codeDesc != "Printed" & codeDesc != "Escalated" & codeDesc != "Submitter Contacted") %>% 
+  group_by(requestId) %>% 
+  summarise(LastAction = codeDesc[which.max(id)],
+            dateLastAction = displayDate[which.max(id)])
+
+
+d <- merge(requestUpdated, lastAction, by.x = "id", by.y = "requestId")
+
+# Narrow down to useful columns
+# I drop displayLastAction because it is not the same as the date I create above
+# Because above I take out things like "printed"
+# Who cares when it was printed?!? That's not an action
+d <- d %>% 
+  select(id, cityName, comments, dept, displayDate, district, latitude, longitude, streetId: dateLastAction)
+
+# Write it out
+write.csv(d, "//fileshare1/Departments2/Somerstat Data/Constituent_Services/data/311_Somerville.csv", row.names = FALSE)
+write.csv(d, "./data/311_Somerville.csv", row.names = FALSE)
+
+
+# Upload to Socrata
+PUT("https://data.somervillema.gov/resource/kwbv-s3ym.json",
+    body = upload_file("./data/311_Somerville.csv"),
+    authenticate("scraig@somervillema.gov", "Constituent2"), 
+    add_headers("X-App-Token" = "FSax3MAURoTngN3uz9mGBZVR8",
+                "Content-Type" = "text/csv"))
 
 
 ####  Visualize ####
