@@ -20,6 +20,7 @@ library(lubridate)
 activity <- read.csv("./data/activity.csv")
 submitter <- read.csv("./data/submitter.csv")
 request <- read.csv("./data/request.csv")
+reqcustom <- read.csv("./data/reqcustom.csv")
 
 
 # Changes since x
@@ -33,6 +34,7 @@ d <- fromJSON(api)
 activityChanges <- d$activity
 submitterChanges <- d$submitter
 requestChanges <- d$request
+reqcustomChanges <- d$reqcustom
 
 
 # Now merge the dataframes
@@ -40,6 +42,9 @@ requestChanges <- d$request
 # Merge and get rid of dupes for activity
 activityUpdated <- rbind(activity, activityChanges)
 activityUpdated <- distinct(activityUpdated)
+
+reqcustomUpdated <- rbind(reqcustom, reqcustomChanges)
+reqcustomUpdated <- distinct(reqcustomUpdated)
 
 # Overwrite for request & submitter
 # A clever method: 
@@ -60,9 +65,12 @@ write.csv(activityUpdated, "./data/activity.csv", row.names = FALSE)
 write.csv(submitterUpdated, "//fileshare1/Departments2/Somerstat Data/Constituent_Services/data/submitter.csv", row.names = FALSE)
 write.csv(submitterUpdated, "./data/submitter.csv", row.names = FALSE)
 
+write.csv(reqcustomUpdated, "//fileshare1/Departments2/Somerstat Data/Constituent_Services/data/reqcusreqcustom.csv", row.names = FALSE)
+write.csv(reqcustomUpdated, "./data/reqcusreqcustom.csv", row.names = FALSE)
+
 
 # Remove everything else
-remove(activity, activityChanges, request, requestChanges, submitter, submitterChanges, d)
+remove(activity, activityChanges, request, requestChanges, submitter, submitterChanges, reqcustom, reqcustomChanges, d)
 
 
 
@@ -107,7 +115,7 @@ requestUpdated$DaysAgo <- difftime(requestUpdated$Date, today, units = "days")
 #### Top from last day #### 
 
 LastTwentyFour <- requestUpdated %>%
-  filter(DaysAgo > -1) %>%
+  filter(DaysAgo > -2) %>%
   group_by(typeName) %>%
   summarize(count=n()) %>%
   filter(count > 5)
