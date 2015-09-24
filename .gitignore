@@ -1,1 +1,4 @@
 .httr-oauth
+data/*
+Rplots.pdf
+plots/*
