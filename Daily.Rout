@@ -23,4 +23,4 @@ Warning message:
 package 'jsonlite' was built under R version 3.1.3 
 > proc.time()
    user  system elapsed 
-  62.11   14.94  111.07 
+  74.13   17.69  142.88 

@@ -76,8 +76,9 @@ remove(activity, activityChanges, request, requestChanges, submitter, submitterC
 
 #### Prepare a singe datset for upload to Socrata and elsewhere ####
 # the summarise is the way to get the latest action by using which.max
+# we get rid of all the admin type actions, because those are of no interest to the public
 lastAction <- activityUpdated  %>%
-  filter(codeDesc != "Printed" & codeDesc != "Escalated" & codeDesc != "Submitter Contacted") %>% 
+  filter(codeDesc %in% c("Closed", "Created", "Re-opened")) %>% 
   group_by(requestId) %>% 
   summarise(LastAction = codeDesc[which.max(id)],
             dateLastAction = displayDate[which.max(id)])
