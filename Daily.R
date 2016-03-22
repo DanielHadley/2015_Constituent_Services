@@ -33,7 +33,7 @@ api <- paste("https://somervillema.qscend.com/qalert/api/v1/requests/changes/?si
 d <- fromJSON(api)
 
 activityChanges <- d$activity
-submitterChanges <- d$submitter
+submitterChanges <- d$submitter %>% select(-twitterId, -twitterScreenName)
 requestChanges <- d$request
 reqcustomChanges <- d$reqcustom
 
