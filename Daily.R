@@ -107,6 +107,14 @@ d$secondary_issue_type <- ifelse(d$typeId %in% serviceRequests, "Service Request
                         ifelse(d$typeId %in% DPWInternal, "DPW Internal", NA)))
 
 
+## Here is for when 311 changes the type names
+d <- d %>% 
+  mutate(typeName = ifelse(typeName == "Appeal issue", "Appeal issue Request", typeName),
+         typeName = ifelse(typeName == "Reissue notice", "Reissue notice Request", typeName),
+         typeName = ifelse(typeName == "Reschedule hearing", "Reschedule hearing request", typeName))
+         
+
+
 # Write it out
 write.csv(d, "//fileshare1/Departments2/Somerstat Data/Constituent_Services/data/311_Somerville.csv", row.names = FALSE)
 write.csv(d, "./data/311_Somerville.csv", row.names = FALSE)
